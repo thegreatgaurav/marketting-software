@@ -2,7 +2,23 @@
 
 Follow these steps to push your project to GitHub:
 
-## Step 1: Initialize Git Repository
+## Step 1: Configure Git (First Time Only)
+
+If you haven't configured Git before, set your identity:
+
+```bash
+git config --global user.email "your.email@example.com"
+git config --global user.name "Your Name"
+```
+
+Or if you only want to set it for this repository:
+
+```bash
+git config user.email "your.email@example.com"
+git config user.name "Your Name"
+```
+
+## Step 2: Initialize Git Repository
 
 Open your terminal in the project directory and run:
 
@@ -10,19 +26,19 @@ Open your terminal in the project directory and run:
 git init
 ```
 
-## Step 2: Add All Files
+## Step 3: Add All Files
 
 ```bash
 git add .
 ```
 
-## Step 3: Create Initial Commit
+## Step 4: Create Initial Commit
 
 ```bash
 git commit -m "Initial commit: Marketing software with Google Sheets, Drive, and VervBridge integration"
 ```
 
-## Step 4: Create a GitHub Repository
+## Step 5: Create a GitHub Repository
 
 1. Go to [GitHub.com](https://github.com) and sign in
 2. Click the **+** icon in the top right corner
@@ -32,7 +48,7 @@ git commit -m "Initial commit: Marketing software with Google Sheets, Drive, and
 6. **DO NOT** initialize with README, .gitignore, or license (we already have these)
 7. Click **Create repository**
 
-## Step 5: Add Remote and Push
+## Step 6: Add Remote and Push
 
 GitHub will show you commands. Use these (replace `YOUR_USERNAME` and `REPO_NAME`):
 
