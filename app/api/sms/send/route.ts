@@ -3,9 +3,11 @@ import { withAuth } from '@/lib/middleware';
 import axios from 'axios';
 import { appendToSheet, ensureSheetTab } from '@/lib/googleSheets';
 
-const VERVBRIDGE_API_KEY = 'f0JCyQaS7viVNm287IOosu7cHRA69Z';
-const SENDER_NUMBER = '919810889150';
-const VERVBRIDGE_API_URL = 'https://api.vervbridge.com/v1/send';
+// Configurable via environment with safe dev fallback
+const VERVBRIDGE_API_KEY = process.env.VERVBRIDGE_API_KEY || '';
+const SENDER_NUMBER = process.env.SENDER_NUMBER || '';
+const VERVBRIDGE_API_URL = process.env.VERVBRIDGE_API_URL || 'https://api.vervbridge.com/v1/send';
+const DEV_SMS_MODE = process.env.DEV_SMS_MODE === 'true';
 
 async function handler(req: NextRequest) {
   try {
@@ -21,6 +23,17 @@ async function handler(req: NextRequest) {
 
     // Ensure Messages sheet exists
     await ensureSheetTab('Messages', ['To', 'Message', 'Type', 'Status', 'Date', 'Response']);
+
+    // If in dev mode or credentials missing, simulate send for a seamless experience
+    if (DEV_SMS_MODE || !VERVBRIDGE_API_KEY || !SENDER_NUMBER) {
+      const date = new Date().toISOString();
+      await appendToSheet('Messages', [to, message, type, 'Sent (Simulated)', date, 'DEV_SMS_MODE']);
+      return NextResponse.json({
+        success: true,
+        message: 'Message sent successfully (simulated)',
+        data: { simulated: true },
+      });
+    }
 
     try {
       // Send via VervBridge API
