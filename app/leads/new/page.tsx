@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useState, FormEvent } from "react";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
-export default function Contact() {
+export default function NewLeadPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,61 +16,48 @@ export default function Contact() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     try {
-      const response = await fetch("/api/leads/create", {
+      const res = await fetch("/api/leads/create", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success("Thank you! We'll get back to you soon.");
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Lead added successfully.");
         setFormData({ name: "", email: "", phone: "", message: "" });
       } else {
-        toast.error(data.error || "Something went wrong. Please try again.");
+        toast.error(data.error || "Failed to add lead.");
       }
-    } catch (error) {
-      toast.error("Network error. Please try again.");
+    } catch {
+      toast.error("Network error.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold text-gray-800">
-                MarketingPro
+            <h1 className="text-xl font-bold text-gray-800">Add New Lead</h1>
+            <div className="flex items-center space-x-4">
+              <Link href="/admin/login" className="text-gray-700 hover:text-gray-900">
+                Admin Login
               </Link>
-            </div>
-            <div className="flex space-x-4">
-              <Link href="/" className="text-gray-700 hover:text-gray-900 px-3 py-2">Home</Link>
-              {/* About and Services removed */}
-              <Link href="/contact" className="text-gray-700 hover:text-gray-900 px-3 py-2 font-semibold">Contact</Link>
-              <Link href="/admin/login" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Admin Login</Link>
             </div>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h1 className="text-4xl font-bold mb-8 text-center">Contact Us</h1>
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-8">
           <div className="mb-6">
-            <label htmlFor="name" className="block text-gray-700 font-semibold mb-2">
-              Name *
-            </label>
+            <label htmlFor="name" className="block text-gray-700 font-semibold mb-2">Name *</label>
             <input
-              type="text"
               id="name"
+              type="text"
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -79,12 +66,10 @@ export default function Contact() {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="email" className="block text-gray-700 font-semibold mb-2">
-              Email *
-            </label>
+            <label htmlFor="email" className="block text-gray-700 font-semibold mb-2">Email *</label>
             <input
-              type="email"
               id="email"
+              type="email"
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -93,12 +78,10 @@ export default function Contact() {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="phone" className="block text-gray-700 font-semibold mb-2">
-              Phone *
-            </label>
+            <label htmlFor="phone" className="block text-gray-700 font-semibold mb-2">Phone *</label>
             <input
-              type="tel"
               id="phone"
+              type="tel"
               required
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -107,9 +90,7 @@ export default function Contact() {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="message" className="block text-gray-700 font-semibold mb-2">
-              Message *
-            </label>
+            <label htmlFor="message" className="block text-gray-700 font-semibold mb-2">Message *</label>
             <textarea
               id="message"
               required
@@ -125,16 +106,10 @@ export default function Contact() {
             disabled={isSubmitting}
             className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? "Submitting..." : "Send Message"}
+            {isSubmitting ? "Submitting..." : "Add Lead"}
           </button>
         </form>
       </main>
-
-      <footer className="bg-gray-800 text-white py-8 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>&copy; 2024 MarketingPro. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 }
