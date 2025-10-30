@@ -15,12 +15,7 @@ export default function Home() {
               <Link href="/" className="text-gray-700 hover:text-gray-900 px-3 py-2">
                 Home
               </Link>
-              <Link href="/about" className="text-gray-700 hover:text-gray-900 px-3 py-2">
-                About
-              </Link>
-              <Link href="/services" className="text-gray-700 hover:text-gray-900 px-3 py-2">
-                Services
-              </Link>
+              {/* About and Services removed */}
               <Link href="/contact" className="text-gray-700 hover:text-gray-900 px-3 py-2">
                 Contact
               </Link>

@@ -53,8 +53,7 @@ export default function Contact() {
             </div>
             <div className="flex space-x-4">
               <Link href="/" className="text-gray-700 hover:text-gray-900 px-3 py-2">Home</Link>
-              <Link href="/about" className="text-gray-700 hover:text-gray-900 px-3 py-2">About</Link>
-              <Link href="/services" className="text-gray-700 hover:text-gray-900 px-3 py-2">Services</Link>
+              {/* About and Services removed */}
               <Link href="/contact" className="text-gray-700 hover:text-gray-900 px-3 py-2 font-semibold">Contact</Link>
               <Link href="/admin/login" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Admin Login</Link>
             </div>
