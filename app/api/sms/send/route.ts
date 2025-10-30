@@ -3,14 +3,15 @@ import { withAuth } from '@/lib/middleware';
 import axios from 'axios';
 import { appendToSheet, ensureSheetTab } from '@/lib/googleSheets';
 
-const VERVBRIDGE_API_KEY = 'f0JCyQaS7viVNm287IOosu7cHRA69Z';
-const SENDER_NUMBER = '919810889150';
-const VERVBRIDGE_API_URL = 'https://api.vervbridge.com/v1/send';
+// WhatsApp API configuration via environment variables
+const WA_API_KEY = process.env.WA_API_KEY;
+const WA_SENDER_NUMBER = process.env.WA_SENDER_NUMBER;
+const WA_API_ENDPOINT = process.env.WA_API_ENDPOINT || 'https://wa.vervebridge.in/send-message';
 
 async function handler(req: NextRequest) {
   try {
     const body = await req.json();
-    const { to, message, type = 'sms' } = body;
+    const { to, message, type = 'whatsapp' } = body;
 
     if (!to || !message) {
       return NextResponse.json(
@@ -22,13 +23,21 @@ async function handler(req: NextRequest) {
     // Ensure Messages sheet exists
     await ensureSheetTab('Messages', ['To', 'Message', 'Type', 'Status', 'Date', 'Response']);
 
+    // Validate server configuration
+    if (!WA_API_KEY || !WA_SENDER_NUMBER) {
+      return NextResponse.json(
+        { error: 'Server not configured: WA_API_KEY or WA_SENDER_NUMBER missing' },
+        { status: 500 }
+      );
+    }
+
     try {
-      // Send via VervBridge API
+      // Send via configured WhatsApp API
       const response = await axios.post(
-        VERVBRIDGE_API_URL,
+        WA_API_ENDPOINT,
         {
-          api_key: VERVBRIDGE_API_KEY,
-          from: SENDER_NUMBER,
+          api_key: WA_API_KEY,
+          from: WA_SENDER_NUMBER,
           to: to,
           message: message,
           type: type, // 'sms' or 'whatsapp'
