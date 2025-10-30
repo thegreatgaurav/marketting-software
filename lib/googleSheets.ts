@@ -4,8 +4,12 @@ import path from 'path';
 
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID || '1vEh5dvyWBTRQvYKP8eT3ozBaX6V89L0DQ0JXr3nOM4c';
 const USE_LOCAL = !process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
-const DATA_DIR = process.env.DATA_DIR || '.data';
-const SHEETS_DIR = path.join(process.cwd(), DATA_DIR, 'sheets');
+const TMP_BASE = process.env.TMPDIR || '/tmp';
+const ENV_DATA_DIR = process.env.DATA_DIR;
+const DATA_BASE_DIR = ENV_DATA_DIR
+  ? (path.isAbsolute(ENV_DATA_DIR) ? ENV_DATA_DIR : path.join(TMP_BASE, ENV_DATA_DIR))
+  : TMP_BASE;
+const SHEETS_DIR = path.join(DATA_BASE_DIR, 'sheets');
 
 async function ensureLocalDir() {
   await fs.mkdir(SHEETS_DIR, { recursive: true });

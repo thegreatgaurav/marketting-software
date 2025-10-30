@@ -5,8 +5,12 @@ import crypto from 'crypto';
 
 const DRIVE_FOLDER_ID = process.env.DRIVE_FOLDER_ID || '1o9678grxPaJDHPsB3qPirt0YtSoOkQLP';
 const USE_LOCAL = !process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
-const DATA_DIR = process.env.DATA_DIR || '.data';
-const MEDIA_DIR = path.join(process.cwd(), DATA_DIR, 'media');
+const TMP_BASE = process.env.TMPDIR || '/tmp';
+const ENV_DATA_DIR = process.env.DATA_DIR;
+const DATA_BASE_DIR = ENV_DATA_DIR
+  ? (path.isAbsolute(ENV_DATA_DIR) ? ENV_DATA_DIR : path.join(TMP_BASE, ENV_DATA_DIR))
+  : TMP_BASE;
+const MEDIA_DIR = path.join(DATA_BASE_DIR, 'media');
 const MEDIA_INDEX = path.join(MEDIA_DIR, 'index.json');
 
 async function ensureLocalDir() {
