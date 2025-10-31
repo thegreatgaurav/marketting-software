@@ -50,7 +50,7 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       if (activeTab === "leads") {
-        const response = await fetch("/api/leads/list");
+        const response = await fetch("/api/leads/list", { credentials: "include" });
         if (response.ok) {
           const data = await response.json();
           setLeads(data.leads);
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
           toast.error("Failed to load leads");
         }
       } else if (activeTab === "media") {
-        const response = await fetch("/api/media/list");
+        const response = await fetch("/api/media/list", { credentials: "include" });
         if (response.ok) {
           const data = await response.json();
           setMedia(data.files);
@@ -82,7 +82,7 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = async () => {
-    await fetch("/api/admin/logout", { method: "POST" });
+    await fetch("/api/admin/logout", { method: "POST", credentials: "include" });
     router.push("/admin/login");
   };
 
@@ -97,6 +97,7 @@ export default function AdminDashboard() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(messageForm),
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -130,6 +131,7 @@ export default function AdminDashboard() {
       const response = await fetch("/api/media/upload", {
         method: "POST",
         body: formData,
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -162,6 +164,7 @@ export default function AdminDashboard() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ fileId }),
+        credentials: "include",
       });
 
       if (response.ok) {

@@ -1,6 +1,40 @@
 import { google } from 'googleapis';
+import fs from 'fs/promises';
+import path from 'path';
 
-const SPREADSHEET_ID = '1vEh5dvyWBTRQvYKP8eT3ozBaX6V89L0DQ0JXr3nOM4c';
+const SPREADSHEET_ID = process.env.SPREADSHEET_ID || '1vEh5dvyWBTRQvYKP8eT3ozBaX6V89L0DQ0JXr3nOM4c';
+const USE_LOCAL = !process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+const TMP_BASE = process.env.TMPDIR || '/tmp';
+const ENV_DATA_DIR = process.env.DATA_DIR;
+const DATA_BASE_DIR = ENV_DATA_DIR
+  ? (path.isAbsolute(ENV_DATA_DIR) ? ENV_DATA_DIR : path.join(TMP_BASE, ENV_DATA_DIR))
+  : TMP_BASE;
+const SHEETS_DIR = path.join(DATA_BASE_DIR, 'sheets');
+
+async function ensureLocalDir() {
+  await fs.mkdir(SHEETS_DIR, { recursive: true });
+}
+
+function getLocalSheetPath(tabName: string) {
+  return path.join(SHEETS_DIR, `${tabName}.json`);
+}
+
+async function readLocalRows(tabName: string): Promise<any[][]> {
+  await ensureLocalDir();
+  const filePath = getLocalSheetPath(tabName);
+  try {
+    const raw = await fs.readFile(filePath, 'utf-8');
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+async function writeLocalRows(tabName: string, rows: any[][]): Promise<void> {
+  await ensureLocalDir();
+  const filePath = getLocalSheetPath(tabName);
+  await fs.writeFile(filePath, JSON.stringify(rows, null, 2), 'utf-8');
+}
 
 function getAuthClient() {
   const serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
@@ -18,6 +52,17 @@ function getAuthClient() {
 }
 
 export async function ensureSheetTab(tabName: string, headers: string[]) {
+  if (USE_LOCAL) {
+    const rows = await readLocalRows(tabName);
+    if (rows.length === 0) {
+      await writeLocalRows(tabName, [headers]);
+    } else if (rows[0].length === 0) {
+      rows[0] = headers;
+      await writeLocalRows(tabName, rows);
+    }
+    return;
+  }
+
   const auth = await getAuthClient();
   const sheets = google.sheets({ version: 'v4', auth });
 
@@ -85,6 +130,18 @@ export async function ensureSheetTab(tabName: string, headers: string[]) {
 }
 
 export async function appendToSheet(tabName: string, values: any[]) {
+  if (USE_LOCAL) {
+    const rows = await readLocalRows(tabName);
+    if (rows.length === 0) {
+      // If headers were not ensured, create empty header row to avoid shift errors
+      await writeLocalRows(tabName, [[], values]);
+    } else {
+      rows.push(values);
+      await writeLocalRows(tabName, rows);
+    }
+    return;
+  }
+
   const auth = await getAuthClient();
   const sheets = google.sheets({ version: 'v4', auth });
 
@@ -100,6 +157,19 @@ export async function appendToSheet(tabName: string, values: any[]) {
 }
 
 export async function getSheetData(tabName: string) {
+  if (USE_LOCAL) {
+    const rows = await readLocalRows(tabName);
+    if (rows.length === 0) return [];
+    const headers = rows[0];
+    return rows.slice(1).map((row) => {
+      const obj: any = {};
+      headers.forEach((header: string, index: number) => {
+        obj[header] = row[index] || '';
+      });
+      return obj;
+    });
+  }
+
   const auth = await getAuthClient();
   const sheets = google.sheets({ version: 'v4', auth });
 
@@ -122,6 +192,14 @@ export async function getSheetData(tabName: string) {
 }
 
 export async function updateSheetRow(tabName: string, rowIndex: number, values: any[]) {
+  if (USE_LOCAL) {
+    const rows = await readLocalRows(tabName);
+    if (rows.length < rowIndex + 2) return; // out of range, ignore
+    rows[rowIndex + 1] = values;
+    await writeLocalRows(tabName, rows);
+    return;
+  }
+
   const auth = await getAuthClient();
   const sheets = google.sheets({ version: 'v4', auth });
 
@@ -136,6 +214,14 @@ export async function updateSheetRow(tabName: string, rowIndex: number, values: 
 }
 
 export async function deleteSheetRow(tabName: string, rowIndex: number) {
+  if (USE_LOCAL) {
+    const rows = await readLocalRows(tabName);
+    if (rows.length < rowIndex + 2) return; // out of range, ignore
+    rows.splice(rowIndex + 1, 1);
+    await writeLocalRows(tabName, rows);
+    return;
+  }
+
   const auth = await getAuthClient();
   const sheets = google.sheets({ version: 'v4', auth });
 
